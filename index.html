@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Flower</title>
+<style>
+/* ===== 全体 ===== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+    touch-action: none;
+    font-family: 'Helvetica', 'Arial', sans-serif; /* フォントがない場合の予備 */
+    color: white;
+}
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* ===== 動画（完全非表示） ===== */
+#introVideo {
+    display: none;
+}
+
+/* ===== 開始画面（スマホ対策） ===== */
+#startOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    background: black;
+    cursor: pointer;
+}
+
+/* ===== メイン画面 ===== */
+#scene {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: none;
+}
+
+/* ===== キャラクター ===== */
+#character {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 60%;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+/* ===== テキスト ===== */
+#textBox {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    text-align: left;
+    font-size: 14px; /* スマホで見やすいサイズ */
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<div id="startOverlay">
+    <p style="font-size: 10px;">[ TAP TO START ]</p>
+</div>
+
+<video id="introVideo" src="1000016003.mp4" playsinline muted></video>
+
+<div id="scene">
+    <img id="character" src="1000016001.jpg">
+    <div id="textBox"></div>
+</div>
+
+<script>
+const lines = [
+    "＊....Hello",
+    "＊My name is...Flower。",
+    "",
+    "＊I don't know how many times it's been ",
+    "",
+    "＊The 13th genocide route. It was too unchanged.",
+    "",
+    "＊It's as if you were born only to kill from the very beginning...",
+    "",
+    "＊....",
+    "",
+    "＊Well then.",
+    "",
+    "＊This time, I have something to tell the user.",
+    "",
+    "＊I hope you don't forget that he will be wearing it around 2029.",
+    "",
+    "＊Huh? Why can we recognize time and space?",
+    "",
+    "＊It's a simple thing. I took a peek from the configuration file."
+];
+
+const video = document.getElementById("introVideo");
+const scene = document.getElementById("scene");
+const textBox = document.getElementById("textBox");
+const character = document.getElementById("character");
+const overlay = document.getElementById("startOverlay");
+
+let lineIndex = 0;
+let charIndex = 0;
+
+// ユーザーのタップで開始
+overlay.addEventListener('click', () => {
+    overlay.style.display = "none";
+    
+    // 動画を再生（ミュート解除が必要な場合があるためplay後に制御）
+    const playPromise = video.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            // 再生成功：動画が終わったら次へ
+            video.onended = () => {
+                setTimeout(startScene, 1000);
+            };
+        }).catch(error => {
+            // 再生失敗時（ファイルがない等）でもシーンは開始させる
+            console.log("Video play failed, skipping to scene.");
+            startScene();
+        });
+    }
+});
+
+function startScene() {
+    scene.style.display = "block";
+    typeLine();
+}
+
+function typeLine() {
+    if (lineIndex >= lines.length) {
+        setTimeout(endScene, 2000);
+        return;
+    }
+
+    const currentLine = lines[lineIndex];
+
+    if (charIndex < currentLine.length) {
+        textBox.innerHTML += currentLine.charAt(charIndex);
+        charIndex++;
+        // スマホでの読みやすさを考慮し、少しだけ早く
+        setTimeout(typeLine, 50);
+    } else {
+        textBox.innerHTML += "\n";
+        charIndex = 0;
+        lineIndex++;
+        // 改行後の待ち時間
+        setTimeout(typeLine, 800);
+    }
+}
+
+function endScene() {
+    character.style.opacity = "0";
+    character.style.transition = "opacity 2s";
+    setTimeout(() => {
+        textBox.innerHTML = "";
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
